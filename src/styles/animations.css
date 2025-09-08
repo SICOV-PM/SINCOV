@@ -1,0 +1,78 @@
+/* Animación de burbujas mejorada - más suave y lenta */
+@keyframes rise {
+  0% {
+    transform: translateY(0) scale(0.5);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.5;
+    transform: translateY(-5vh) scale(1);
+  }
+  70% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-110vh) scale(0.6);
+    opacity: 0;
+  }
+}
+
+.bubble {
+  animation-name: rise;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+/* Efectos adicionales para mejor rendimiento */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Animación suave para elementos que aparecen */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Aplicar animación al contenido principal */
+.animate-fadeInUp {
+  animation: fadeInUp 1s ease-out;
+}
+
+/* Mejoras para el texto con gradiente */
+.bg-clip-text {
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Sombra suave para el glassmorphism */
+.glass-card {
+  box-shadow: 
+    0 8px 32px 0 rgba(31, 38, 135, 0.37),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Animación de pulso más sutil */
+@keyframes subtlePulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.3;
+  }
+}
+
+.animate-subtle-pulse {
+  animation: subtlePulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
