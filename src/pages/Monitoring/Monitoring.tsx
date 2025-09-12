@@ -1,23 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import BaseMap from "../../components/map/BaseMap";
 import HeatmapLayer from "../../components/map/HeatmapLayer";
 import type { HeatPoint } from "../../components/map/HeatmapLayer";
+import { getStations } from "../../services/stations";
+import type { Station } from "../../services/stations";
 import "./Monitoring.css";
 
 const Monitoring = () => {
   const [selectedRadius, setSelectedRadius] = useState(25);
   const [showPanel, setShowPanel] = useState(true);
+  const [heatData, setHeatData] = useState<HeatPoint[]>([]);
 
-  // Datos simulados de PM2.5 normalizados (0–1)
-  const heatData: HeatPoint[] = [
-    [4.65, -74.1, 0.8],
-    [4.61, -74.08, 0.6],
-    [4.63, -74.07, 0.9],
-    [4.60, -74.05],
-  ];
+  // 🔹 Cargar estaciones desde el backend
+  useEffect(() => {
+    getStations().then((data) => {
+      const formatted: HeatPoint[] = data.stations.map((s: Station) => [
+        s.lat,
+        s.lng,
+        s.value,
+      ]);
+      setHeatData(formatted);
+    });
+  }, []);
 
-  // Función para obtener el nivel de calidad del aire
+  // 🔹 Función para calcular nivel de calidad del aire
   const getAirQualityInfo = (value: number) => {
     if (value >= 0.8) return { level: "Muy Alto", color: "text-red-600", bg: "bg-red-100" };
     if (value >= 0.6) return { level: "Alto", color: "text-orange-600", bg: "bg-orange-100" };
@@ -25,14 +32,17 @@ const Monitoring = () => {
     return { level: "Bueno", color: "text-green-600", bg: "bg-green-100" };
   };
 
-  // Promedio protegido
+  // 🔹 Calcular promedio de PM2.5
   const averagePM =
-    heatData.reduce((sum, point) => sum + (point[2] ?? 0), 0) / heatData.length;
+    heatData.length > 0
+      ? heatData.reduce((sum, point) => sum + (point[2] ?? 0), 0) / heatData.length
+      : 0;
+
   const currentAirQuality = getAirQualityInfo(averagePM);
 
   return (
     <div className="relative h-screen w-full bg-gray-50">
-      {/* Header */}
+      {/* 🔹 Header */}
       <header className="absolute top-0 left-0 right-0 z-20 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
@@ -54,7 +64,7 @@ const Monitoring = () => {
             <h1 className="text-xl font-bold text-gray-800">Monitoreo PM2.5</h1>
           </div>
 
-          {/* Status indicator */}
+          {/* Indicador de estado */}
           <div
             className={`flex items-center gap-2 px-3 py-1 rounded-full ${currentAirQuality.bg}`}
           >
@@ -71,7 +81,7 @@ const Monitoring = () => {
         </div>
       </header>
 
-      {/* Layout principal: mapa + panel */}
+      {/* 🔹 Layout principal: mapa + panel lateral */}
       <div className="h-full w-full pt-16 flex">
         {/* Mapa */}
         <div className="flex-1">
@@ -87,7 +97,7 @@ const Monitoring = () => {
           }`}
         >
           <div className="h-full w-80 glass-panel shadow-xl relative">
-            {/* Toggle button */}
+            {/* Botón toggle */}
             <button
               onClick={() => setShowPanel(!showPanel)}
               className="absolute -left-12 top-6 w-10 h-10 glass-panel border border-gray-200 rounded-l-lg shadow-lg flex items-center justify-center control-button panel-toggle"
@@ -104,6 +114,7 @@ const Monitoring = () => {
               </svg>
             </button>
 
+            {/* Contenido del panel */}
             <div className="p-6 h-full overflow-y-auto panel-scroll">
               {/* Información general */}
               <div className="mb-6">
@@ -112,17 +123,13 @@ const Monitoring = () => {
                 </h2>
                 <div className="space-y-3">
                   <div className="p-3 bg-blue-50 rounded-lg">
-                    <div className="text-sm text-blue-600 font-medium">
-                      Promedio PM2.5
-                    </div>
+                    <div className="text-sm text-blue-600 font-medium">Promedio PM2.5</div>
                     <div className="text-2xl font-bold text-blue-800">
                       {(averagePM * 100).toFixed(1)}%
                     </div>
                   </div>
                   <div className="p-3 bg-gray-50 rounded-lg">
-                    <div className="text-sm text-gray-600 font-medium">
-                      Puntos de Monitoreo
-                    </div>
+                    <div className="text-sm text-gray-600 font-medium">Puntos de Monitoreo</div>
                     <div className="text-2xl font-bold text-gray-800">
                       {heatData.length}
                     </div>
@@ -221,7 +228,7 @@ const Monitoring = () => {
         </div>
       </div>
 
-      {/* Información flotante inferior */}
+      {/* 🔹 Footer flotante */}
       <div className="absolute bottom-6 left-6 right-6 z-10">
         <div className="glass-panel rounded-2xl shadow-xl p-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
