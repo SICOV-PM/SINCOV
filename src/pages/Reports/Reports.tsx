@@ -1,13 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-
-// Datos simulados de reportes
-const sampleReports = [
-  { id: 1, date: "2025-09-01", avg: 0.45, status: "Moderado" },
-  { id: 2, date: "2025-09-02", avg: 0.32, status: "Bueno" },
-  { id: 3, date: "2025-09-03", avg: 0.68, status: "Alto" },
-  { id: 4, date: "2025-09-04", avg: 0.81, status: "Muy Alto" },
-];
+import { getReports } from "../../services/reports";
+import type { Report } from "../../services/reports";
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -25,7 +19,15 @@ const getStatusColor = (status: string) => {
 };
 
 const Reports = () => {
-  const [reports] = useState(sampleReports);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // 🔹 Cargar reportes desde el backend
+  useEffect(() => {
+    getReports(7)
+      .then((data) => setReports(data.reports))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="relative h-screen w-full bg-gray-50">
@@ -65,51 +67,59 @@ const Reports = () => {
             Promedios diarios de PM2.5
           </h2>
 
-          {/* Tabla de reportes */}
-          <div className="overflow-x-auto">
-            <table className="min-w-full border border-gray-200 rounded-lg">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-600 border-b">
-                    Fecha
-                  </th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-600 border-b">
-                    Promedio PM2.5
-                  </th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-600 border-b">
-                    Estado
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {reports.map((report) => (
-                  <tr key={report.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-2 text-sm text-gray-800 border-b">
-                      {report.date}
-                    </td>
-                    <td className="px-4 py-2 text-sm font-semibold text-gray-900 border-b">
-                      {(report.avg * 100).toFixed(1)}%
-                    </td>
-                    <td className="px-4 py-2 border-b">
-                      <span
-                        className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                          report.status
-                        )}`}
-                      >
-                        {report.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {loading ? (
+            <p className="text-gray-500">Cargando reportes...</p>
+          ) : (
+            <>
+              {/* Tabla de reportes */}
+              <div className="overflow-x-auto">
+                <table className="min-w-full border border-gray-200 rounded-lg">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-sm font-medium text-gray-600 border-b">
+                        Fecha
+                      </th>
+                      <th className="px-4 py-2 text-left text-sm font-medium text-gray-600 border-b">
+                        Promedio PM2.5
+                      </th>
+                      <th className="px-4 py-2 text-left text-sm font-medium text-gray-600 border-b">
+                        Estado
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reports.map((report, i) => (
+                      <tr key={i} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-4 py-2 text-sm text-gray-800 border-b">
+                          {report.date}
+                        </td>
+                        <td className="px-4 py-2 text-sm font-semibold text-gray-900 border-b">
+                          {(report.avg * 100).toFixed(1)}%
+                        </td>
+                        <td className="px-4 py-2 border-b">
+                          <span
+                            className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(
+                              report.status
+                            )}`}
+                          >
+                            {report.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-          {/* Resumen al final */}
-          <div className="mt-6 text-sm text-gray-600">
-            Total de reportes:{" "}
-            <span className="font-semibold text-gray-900">{reports.length}</span>
-          </div>
+              {/* Resumen al final */}
+              <div className="mt-6 text-sm text-gray-600">
+                Total de reportes:{" "}
+                <span className="font-semibold text-gray-900">
+                  {reports.length}
+                </span>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
