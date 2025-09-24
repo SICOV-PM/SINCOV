@@ -1,7 +1,7 @@
-# 🌐 SICOVPM – Frontend
+# 🌐 SINCOV_PM – Frontend
 
-Este repositorio contiene el **frontend del sistema web SICOVPM**, desarrollado con **React, Vite y TailwindCSS**.  
-El sistema permite visualizar de forma interactiva los datos de concentración de **PM2.5** en Bogotá bajo diferentes escenarios, consumiendo la API del backend implementado en **Django REST**.
+Este repositorio contiene el **frontend del sistema web SINCOV_PM**, desarrollado con **React, Vite y TailwindCSS**.  
+El sistema permite visualizar de forma interactiva los datos de concentración de **PM2.5** en Bogotá bajo diferentes escenarios, consumiendo la API del backend implementado en **FastApi**
 
 ---
 
@@ -10,7 +10,6 @@ El sistema permite visualizar de forma interactiva los datos de concentración d
 - **React + Vite** → Renderizado rápido y moderno.  
 - **TailwindCSS** → Estilos utilitarios y diseño responsivo.  
 - **Arquitectura modular** → Separación en componentes, páginas, servicios y rutas.  
-- **Soporte para API REST** → Integración con el backend.  
 - **Configuración lista para producción** con `vite build`.  
 
 ---
@@ -28,18 +27,12 @@ Asegúrate de tener instalado:
 
 ```bash
 # Clonar repositorio
-git clone https://github.com/usuario/sicovpm-frontend.git
-cd sicovpm-frontend
+git clone https://github.com/SICOV-PM/SINCOV.git
+cd SINCOV
 
 # Instalar dependencias
 npm install
-Crear un archivo .env en la raíz con la URL de la API:
 
-env
-VITE_API_URL=http://localhost:8000/api
-▶️ Ejecución en desarrollo
-npm run dev
-El frontend estará disponible en http://localhost:5173/.
 
 🏗️ Construcción para producción
 # Generar build optimizada
@@ -96,4 +89,3 @@ La siguiente estructura refleja la organización principal del frontend
 npm run dev     # Ejecuta en modo desarrollo
 npm run build   # Construye para producción
 npm run preview # Sirve la build localmente
-npm run lint    # Revisa el código con ESLint
