@@ -5,6 +5,7 @@ export interface Station {
   lat: number;
   lng: number;
   value: number;
+  name: string;
 }
 
 export async function getStations(): Promise<{ stations: Station[] }> {
