@@ -33,6 +33,16 @@ const Navbar = () => {
               Reportes
             </NavLink>
             <NavLink
+              to="/predictions"
+              className={({ isActive }) =>
+                `hover:text-blue-600 ${
+                  isActive ? "text-blue-600 font-semibold" : "text-gray-600"
+                }`
+              }
+            >
+              Predicciones
+            </NavLink>
+            <NavLink
               to="/about"
               className={({ isActive }) =>
                 `hover:text-blue-600 ${
