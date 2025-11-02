@@ -1,10 +1,10 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Layout from "../components/layout/Layout";
+import About from "../pages/About/About";
+import Contact from "../pages/Contact/Contact";
 import Home from "../pages/Home/Home";
 import Monitoring from "../pages/Monitoring/Monitoring";
 import Reports from "../pages/Reports/Reports";
-import About from "../pages/About/About";
-import Contact from "../pages/Contact/Contact";
-import Layout from "../components/layout/Layout";
 
 const AppRouter = () => {
   return (
