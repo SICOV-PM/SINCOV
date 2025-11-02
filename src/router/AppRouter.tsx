@@ -4,6 +4,7 @@ import About from "../pages/About/About";
 import Contact from "../pages/Contact/Contact";
 import Home from "../pages/Home/Home";
 import Monitoring from "../pages/Monitoring/Monitoring";
+import Predictions from "../pages/Predictions/Predictions"; // ✅ Nueva importación
 import Reports from "../pages/Reports/Reports";
 
 const AppRouter = () => {
@@ -14,14 +15,6 @@ const AppRouter = () => {
         <Route path="/" element={<Home />} />
 
         {/* Pantallas con navbar */}
-        <Route
-          path="/"
-          element={
-            <Layout>
-              <Monitoring />
-            </Layout>
-          }
-        />
         <Route
           path="/monitoring"
           element={
@@ -35,6 +28,14 @@ const AppRouter = () => {
           element={
             <Layout>
               <Reports />
+            </Layout>
+          }
+        />
+        <Route
+          path="/predictions"
+          element={
+            <Layout>
+              <Predictions />
             </Layout>
           }
         />
