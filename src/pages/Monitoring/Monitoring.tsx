@@ -11,7 +11,7 @@ import "./Monitoring.css";
 
 type HeatPoint = [number, number, number];
 
-// Utilidad compartida para clasificación de calidad del aire
+
 const getAirQualityInfo = (value: number) => {
   if (value >= 151.4) return { level: "Peligroso", color: "text-purple-600", bg: "bg-purple-100", circleColor: "#5126dcff" };
   if (value >= 55.5) return { level: "Alto", color: "text-red-600", bg: "bg-red-100", circleColor: "#dc2626" };
@@ -20,40 +20,29 @@ const getAirQualityInfo = (value: number) => {
   return { level: "Bajo", color: "text-green-600", bg: "bg-green-100", circleColor: "#16a34a" };
 };
 
-// Componente de burbujas
+
 const BubbleMarkers = ({
   points,
   stations,
-  maxRadius 
 }: { 
   points: HeatPoint[]; 
   stations: Station[];
-  maxRadius: number;
 }) => {
   const map = useMap();
+  const FIXED_RADIUS = 25; 
 
   useEffect(() => {
     if (!map || points.length === 0) return;
-
-    const values = points.map(p => p[2]);
-    const minValue = Math.min(...values);
-    const maxValue = Math.max(...values);
-
-    const getRadius = (value: number): number => {
-      const normalized = (value - minValue) / (maxValue - minValue);
-      return 15 + (normalized * (maxRadius - 15));
-    };
 
     const markers: L.CircleMarker[] = [];
 
     points.forEach((point, index) => {
       const [lat, lng, value] = point;
       const station = stations[index];
-      const radius = getRadius(value);
       const { circleColor } = getAirQualityInfo(value);
 
       const bubble = L.circleMarker([lat, lng], {
-        radius: radius,
+        radius: FIXED_RADIUS, // Tamaño fijo
         fillColor: circleColor,
         color: "#ffffff",
         weight: 3,
@@ -120,7 +109,7 @@ const BubbleMarkers = ({
       markers.forEach((marker) => marker.remove());
       style.remove();
     };
-  }, [map, points, stations, maxRadius]);
+  }, [map, points, stations]);
 
   return null;
 };
@@ -187,7 +176,7 @@ const MetricsPanel = ({ stats }: { stats: ReturnType<typeof getStatistics> }) =>
   );
 };
 
-// Utilidad de estadísticas
+
 const getStatistics = (heatData: HeatPoint[]) => {
   if (heatData.length === 0) return null;
   
@@ -215,7 +204,6 @@ const getStatistics = (heatData: HeatPoint[]) => {
 };
 
 const Monitoring = () => {
-  const [selectedRadius, setSelectedRadius] = useState(50);
   const [showPanel, setShowPanel] = useState(true);
   const [heatData, setHeatData] = useState<HeatPoint[]>([]);
   const [stations, setStations] = useState<Station[]>([]);
@@ -273,7 +261,7 @@ const Monitoring = () => {
           ) : (
             <BaseMap center={[4.6097, -74.0817]} zoom={12}>
               {showLocalities && <LocalitiesLayer showLabels={false} opacity={0.25} />}
-              <BubbleMarkers points={heatData} stations={stations} maxRadius={selectedRadius} />
+              <BubbleMarkers points={heatData} stations={stations} />
             </BaseMap>
           )}
         </div>
@@ -300,44 +288,21 @@ const Monitoring = () => {
             <div className="p-6 h-full overflow-y-auto panel-scroll pb-16">
               <MetricsPanel stats={stats} />
 
-              {/* Controles */}
+              {/* Controles - Solo checkbox de localidades */}
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Controles del Mapa</h3>
-                <div className="space-y-4">
-                  <div className="p-4 bg-white rounded-lg border border-gray-200">
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Tamaño de las Burbujas
-                    </label>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-gray-500 font-medium">Pequeño</span>
-                      <input
-                        type="range"
-                        min="20"
-                        max="80"
-                        value={selectedRadius}
-                        onChange={(e) => setSelectedRadius(Number(e.target.value))}
-                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                      />
-                      <span className="text-xs text-gray-500 font-medium">Grande</span>
-                    </div>
-                    <div className="mt-2 text-center">
-                      <span className="text-sm font-bold text-blue-600">Radio máx: {selectedRadius}px</span>
-                    </div>
-                  </div>
-
-                  <div className="p-4 bg-white rounded-lg border border-gray-200">
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={showLocalities}
-                        onChange={(e) => setShowLocalities(e.target.checked)}
-                        className="w-4 h-4 text-blue-600"
-                      />
-                      <span className="text-sm font-medium text-gray-700">
-                        Mostrar límites de localidades
-                      </span>
-                    </label>
-                  </div>
+                <div className="p-4 bg-white rounded-lg border border-gray-200">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={showLocalities}
+                      onChange={(e) => setShowLocalities(e.target.checked)}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm font-medium text-gray-700">
+                      Mostrar límites de localidades
+                    </span>
+                  </label>
                 </div>
               </div>
 
@@ -389,29 +354,36 @@ const Monitoring = () => {
                 )}
               </div>
 
-              {/* Leyenda */}
+               {/* Leyenda IBOCA */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                  Leyenda de Calidad del Aire
+                <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                  Índice IBOCA - PM2.5
                 </h3>
-                <div className="space-y-2 text-sm">
+                <div className="text-xs text-gray-500 mb-3 italic bg-blue-50 p-2 rounded border border-blue-100">
+                  Valores de PM2.5 (μg/m³)
+                </div>
+                <div className="space-y-2">
                   {[
-                    { level: "Bajo", color: "green", range: "0-12" },
-                    { level: "Moderado", color: "yellow", range: "12.1-35.4" },
-                    { level: "Regular", color: "orange", range: "35.5-55.4" },
-                    { level: "Alto", color: "red", range: "55.5-151.4" },
-                    { level: "Peligroso", color: "purple", range: "151.5-500.4" }
-                  ].map(({ level, color, range }) => (
-                    <div key={level} className={`flex items-center justify-between p-2 bg-${color}-50 rounded-lg`}>
-                      <div className="flex items-center gap-2">
-                        <div className={`w-4 h-4 bg-${color}-400 rounded-full`}></div>
-                        <span className="font-medium">{level}</span>
+                    { level: "Favorable", color: "#3b82f6", bgColor: "bg-blue-50", textColor: "text-blue-700", range: "0 - 12.0" },
+                    { level: "Moderada", color: "#22c55e", bgColor: "bg-green-50", textColor: "text-green-700", range: "12.1 - 35.4" },
+                    { level: "Regular", color: "#eab308", bgColor: "bg-yellow-50", textColor: "text-yellow-700", range: "35.5 - 55.4" },
+                    { level: "Mala", color: "#f97316", bgColor: "bg-orange-50", textColor: "text-orange-700", range: "55.5 - 150.4" },
+                    { level: "Muy Mala", color: "#dc2626", bgColor: "bg-red-50", textColor: "text-red-700", range: "150.5 - 250.4" },
+                    { level: "Peligrosa", color: "#9333ea", bgColor: "bg-purple-50", textColor: "text-purple-700", range: "≥ 250.5" }
+                  ].map(({ level, color, bgColor, textColor, range }) => (
+                    <div key={level} className={`flex items-center justify-between p-3 ${bgColor} rounded-lg border border-gray-200 hover:shadow-sm transition-shadow`}>
+                      <div className="flex items-center gap-3">
+                        <div 
+                          className="w-5 h-5 rounded-full shadow-sm border-2 border-white" 
+                          style={{ backgroundColor: color }}
+                        ></div>
+                        <span className={`font-semibold text-sm ${textColor}`}>{level}</span>
                       </div>
-                      <span className="text-xs text-gray-600">{range}</span>
+                      <span className="text-xs text-gray-600 font-mono font-medium">{range}</span>
                     </div>
                   ))}
                 </div>
-              </div>
+                </div>
             </div>
           </div>
         </div>
