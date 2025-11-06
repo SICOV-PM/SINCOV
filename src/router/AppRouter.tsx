@@ -1,7 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Layout from "../components/layout/Layout";
 import About from "../pages/About/About";
-import Contact from "../pages/Contact/Contact";
+//import Contact from "../pages/Contact/Contact";
 import Home from "../pages/Home/Home";
 import Monitoring from "../pages/Monitoring/Monitoring";
 import Predictions from "../pages/Predictions/Predictions"; // ✅ Nueva importación
@@ -47,6 +47,7 @@ const AppRouter = () => {
             </Layout>
           }
         />
+        {/*
         <Route
           path="/contact"
           element={
@@ -55,6 +56,7 @@ const AppRouter = () => {
             </Layout>
           }
         />
+        */}
       </Routes>
     </BrowserRouter>
   );
