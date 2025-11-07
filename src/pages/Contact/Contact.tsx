@@ -1,3 +1,4 @@
+/*
 import { Link } from "react-router-dom";
 import { useState } from "react";
 
@@ -16,13 +17,13 @@ const Contact = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Formulario enviado:", formData);
-    alert("Mensaje enviado (simulado) ✅");
+    alert("Mensaje enviado (simulado) ");
     setFormData({ name: "", email: "", message: "" });
   };
 
   return (
     <div className="relative h-screen w-full bg-gradient-to-br from-blue-50 via-white to-blue-100 overflow-y-auto">
-      {/* Header */}
+      {/* Header //...}
       <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
@@ -51,7 +52,7 @@ const Contact = () => {
         </div>
       </header>
 
-      {/* Formulario */}
+      {/* Formulario //...}
       <main className="px-6 py-10 max-w-2xl mx-auto">
         <div className="bg-white rounded-2xl shadow-lg p-8 glass-panel">
           <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
@@ -117,3 +118,11 @@ const Contact = () => {
 };
 
 export default Contact;
+*/
+
+
+
+// Empty export to avoid errors if you try to import
+export default function Contact() {
+  return null;
+}
