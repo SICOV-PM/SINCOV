@@ -4,7 +4,8 @@ import About from "../pages/About/About";
 //import Contact from "../pages/Contact/Contact";
 import Home from "../pages/Home/Home";
 import Monitoring from "../pages/Monitoring/Monitoring";
-import Predictions from "../pages/Predictions/Predictions"; // ✅ Nueva importación
+//import Predictions from "../pages/Predictions/Predictions"; No se usa
+import PredictionsReal from "../pages/Predictions/PredictionsReal";
 import Reports from "../pages/Reports/Reports";
 
 const AppRouter = () => {
@@ -31,6 +32,7 @@ const AppRouter = () => {
             </Layout>
           }
         />
+        {/*
         <Route
           path="/predictions"
           element={
@@ -39,6 +41,15 @@ const AppRouter = () => {
             </Layout>
           }
         />
+        */}
+        <Route 
+          path="/predictions-real" 
+          element={
+            <Layout>
+              <PredictionsReal />
+            </Layout>
+          } 
+          />
         <Route
           path="/about"
           element={
