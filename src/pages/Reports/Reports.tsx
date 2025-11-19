@@ -45,9 +45,6 @@ const getTrendColor = (trend: string) => {
   return 'text-gray-600';
 };
 
-// =================================================================
-// 📊 REPORTE DETALLADO CON DATOS REALES
-// =================================================================
 
 const ReporteDetallado = ({ 
   stationId, 
@@ -80,7 +77,7 @@ const ReporteDetallado = ({
   }, [stationId]);
 
   const handleDownloadPDF = () => {
-    alert(`🚨 Descarga de PDF será implementada próximamente.\nEstación: ${reportData?.station_name}`);
+    alert(`Descarga de PDF será implementada próximamente.\nEstación: ${reportData?.station_name}`);
   };
 
   if (loading) {
@@ -130,7 +127,7 @@ const ReporteDetallado = ({
       </button>
 
       <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-        {/* TÍTULO Y BOTÓN DE DESCARGA */}
+        
         <div className="flex justify-between items-center border-b pb-4 mb-6">
           <div>
             <h1 className="text-3xl font-extrabold text-gray-800">
@@ -143,7 +140,7 @@ const ReporteDetallado = ({
           
         </div>
 
-        {/* RESUMEN EJECUTIVO PM2.5 */}
+       
         {reportData.pm25 ? (
           <>
             <h2 className="text-xl font-semibold text-gray-700 mb-4">
@@ -184,12 +181,12 @@ const ReporteDetallado = ({
         ) : (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
             <p className="text-yellow-800 font-medium">
-              ⚠️ No hay datos de PM2.5 disponibles para esta estación en las últimas 24 horas
+               No hay datos de PM2.5 disponibles para esta estación en las últimas 24 horas
             </p>
           </div>
         )}
 
-        {/* OTROS CONTAMINANTES */}
+       
         {reportData.other_monitors.length > 0 ? (
           <>
             <h2 className="text-xl font-semibold text-gray-700 mb-4 border-t pt-6">
@@ -239,7 +236,7 @@ const ReporteDetallado = ({
           </div>
         )}
 
-        {/* INFORMACIÓN ADICIONAL */}
+       
         <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <h3 className="font-semibold text-blue-900 mb-2"> Información del Reporte</h3>
           <div className="text-sm text-blue-800 space-y-1">
@@ -253,9 +250,6 @@ const ReporteDetallado = ({
   );
 };
 
-// =================================================================
-// ⚛️ COMPONENTE PRINCIPAL REPORTS
-// =================================================================
 
 const Reports = () => {
   const [viewMode, setViewMode] = useState<"pm25" | "monitor">("pm25");
@@ -268,7 +262,7 @@ const Reports = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Estado para mostrar el reporte detallado
+ 
   const [selectedStationId, setSelectedStationId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -323,7 +317,7 @@ const Reports = () => {
     );
   }
 
-  // Vista principal de reportes
+  
   return (
     <div className="relative min-h-screen w-full bg-gray-50">
       {/* Header */}
@@ -624,7 +618,7 @@ const Reports = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm text-gray-900">
-                                {report.date}
+                                {new Date().toISOString().slice(0, 19).replace('T', ' ')}-05
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
@@ -650,7 +644,7 @@ const Reports = () => {
                                 className="bg-blue-600 hover:bg-blue-700 text-white text-xs py-2 px-4 rounded-md transition duration-150 shadow-sm font-medium"
                                 title="Ver Reporte Detallado"
                               >
-                                📊 Ver Reporte
+                                Ver Reporte
                               </button>
                             </td>
                           </tr>
