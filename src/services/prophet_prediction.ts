@@ -180,7 +180,7 @@ export async function predictPM25Prophet(
   
   saveData(dataToStore);
   
-  console.log("✅ Predicción Prophet generada y guardada");
+  console.log(" Predicción Prophet generada y guardada");
   
   return predictions;
 }

@@ -188,7 +188,7 @@ export async function predictPM25Real(
  * @public
  */
 export async function getAllowedStations(): Promise<AllowedStationsResponse> {
-  console.log("🔍 Obteniendo estaciones permitidas...");
+  console.log(" Obteniendo estaciones permitidas...");
   
   try {
     const response = await apiFetch<AllowedStationsResponse>(
@@ -214,7 +214,7 @@ export async function getAllowedStations(): Promise<AllowedStationsResponse> {
  * const health = await checkModelsHealth();
  * 
  * if (health.status === "healthy") {
- *   console.log("✅ Todos los modelos cargados correctamente");
+ *   console.log(" Todos los modelos cargados correctamente");
  *   Object.entries(health.models).forEach(([name, info]) => {
  *     console.log(`${name}: ${info.num_features} features`);
  *   });
