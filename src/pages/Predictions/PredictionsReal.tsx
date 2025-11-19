@@ -11,13 +11,13 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-//import {
- // formatConfidenceInterval,
- // getUncertaintyPercentage,
- // predictPM25Prophet,
- // type ProphetHorizon,
- // type ProphetPredictionResponse
-//} from "../../services/prophet_prediction"; ##### IMPORTANTE: Descomentar al habilitar Prophet
+import {
+  formatConfidenceInterval,
+  getUncertaintyPercentage,
+  predictPM25Prophet,
+  type ProphetHorizon,
+  type ProphetPredictionResponse
+} from "../../services/prophet_prediction"; 
 import {
   checkModelsHealth,
   getAirQualityStatus,
@@ -499,8 +499,9 @@ const PredictionsReal = () => {
                   </h2>
                   <div className="grid grid-cols-4 gap-4">
                     <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                      <div className="text-xs font-medium text-purple-700 mb-1">Estación</div>
-                      <div className="text-sm font-bold text-purple-900">{prophetPrediction.station_name}</div>
+                        <div className="text-xs font-medium text-purple-700 mb-1">Ciudad</div>
+                        <div className="text-sm font-bold text-purple-900">Bogotá</div>
+                        <div className="text-xs text-purple-600 mt-1">Promedio 10 estaciones</div>
                     </div>
                     <div className="p-4 bg-pink-50 rounded-lg border border-pink-200">
                       <div className="text-xs font-medium text-pink-700 mb-1">Modelo</div>
@@ -537,7 +538,7 @@ const PredictionsReal = () => {
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         {Object.entries(prophetPrediction.predictions).map(([horizon, pred]) => {
-                          // Validaciones de seguridad
+                          
                           if (!pred || typeof pred.predicted_pm25 !== "number") return null;
 
                           const date = new Date(pred.prediction_timestamp);
