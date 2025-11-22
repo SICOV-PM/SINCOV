@@ -32,6 +32,7 @@ const Navbar = () => {
             >
               Reportes
             </NavLink>
+            {/*}
             <NavLink
               to="/predictions"
               className={({ isActive }) =>
@@ -40,8 +41,21 @@ const Navbar = () => {
                 }`
               }
             >
+            
               Predicciones
-            </NavLink>
+              </NavLink>
+            */}
+            
+            <NavLink
+              to="/predictions-real"
+              className={({ isActive }) =>
+                `hover:text-purple-600 ${
+                  isActive ? "text-purple-600 font-semibold" : "text-gray-600"
+                }`
+              }
+            >
+              Predicciones
+            </NavLink> 
             <NavLink
               to="/about"
               className={({ isActive }) =>
