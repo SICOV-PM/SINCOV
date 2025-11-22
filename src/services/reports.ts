@@ -35,6 +35,43 @@ export interface StationDetail {
   }[];
 }
 
+export interface StationReport24h {
+  station_id: number;
+  station_name: string;
+  lat: number;
+  lng: number;
+  pm25: {
+    type: string;
+    unit: string;
+    total_lecturas: number;
+    promedio_24h: number;
+    minimo_24h: number;
+    maximo_24h: number;
+    sma_4h: number;
+    ultima_lectura: string;
+    tendencia: string;
+  } | null;
+  other_monitors: Array<{
+    type: string;
+    unit: string;
+    total_lecturas: number;
+    promedio_24h: number;
+    minimo_24h: number;
+    maximo_24h: number;
+    sma_4h: number;
+    ultima_lectura: string;
+    tendencia: string;
+  }>;
+  report_timestamp: string;
+}
+
+export async function getStationReport24h(stationId: number): Promise<{
+  success: boolean;
+  data: StationReport24h;
+}> {
+  return apiFetch(`/stations/${stationId}/report`);
+}
+
 export interface MonitorReport {
   station_id: number;
   station_name: string;
