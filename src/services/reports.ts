@@ -79,8 +79,10 @@ export interface MonitorReport {
   lng: number;
   monitor_type: string;
   value: number;
+  unit: string;
   status: string;
   timestamp: string;
+  
 }
 
 // Endpoints existentes
@@ -154,6 +156,7 @@ export async function getReportsByMonitor(monitorType: string): Promise<{
         lng: station.lng,
         monitor_type: monitorType,
         value: value,
+        unit: monitor.unit,
         status: calculateMonitorStatus(monitorType, value),
         timestamp: monitor.ultima_medicion
       });

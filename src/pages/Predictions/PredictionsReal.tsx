@@ -48,6 +48,7 @@ const PredictionsReal = () => {
   const [error, setError] = useState<string | null>(null);
   const [modelsHealthy, setModelsHealthy] = useState<boolean>(false);
   const [activeModel, setActiveModel] = useState<ModelType | null>(null);
+  const [selectedModel, setSelectedModel] = useState<ModelType | null>(null);
 
   // ===== Carga inicial =====
   useEffect(() => {
@@ -70,6 +71,34 @@ const PredictionsReal = () => {
       .finally(() => setLoadingStations(false));
   }, []);
 
+  // ===== Función para determinar si un horizonte está deshabilitado =====
+  const isHorizonDisabled = (horizon: number): boolean => {
+    if (!selectedModel) return false;
+    
+    if (selectedModel === "xgboost") {
+      return horizon > 12;
+    }
+    
+    if (selectedModel === "prophet") {
+      return horizon !== 24;
+    }
+    
+    return false;
+  };
+
+  // ===== Toggle de horizonte =====
+  const toggleHorizon = (horizon: number) => {
+    if (isHorizonDisabled(horizon)) {
+      return;
+    }
+
+    setSelectedHorizons(prev => 
+      prev.includes(horizon)
+        ? prev.filter(h => h !== horizon)
+        : [...prev, horizon].sort((a, b) => a - b)
+    );
+  };
+
   // ===== Handler de predicción XGBoost =====
   const handlePredictXGBoost = async () => {
     if (!selectedStation) {
@@ -82,7 +111,11 @@ const PredictionsReal = () => {
       return;
     }
 
-    // Validar horizontes para XGBoost (máximo 12h)
+    if (selectedModel !== "xgboost") {
+      setError("Debes seleccionar el modelo XGBoost primero");
+      return;
+    }
+
     const validHorizons = selectedHorizons.filter(h => h <= 12) as XGBoostHorizon[];
     if (validHorizons.length === 0) {
       setError("XGBoost solo soporta horizontes hasta 12h");
@@ -122,7 +155,11 @@ const PredictionsReal = () => {
       return;
     }
 
-    // Prophet soporta hasta 24h
+    if (selectedModel !== "prophet") {
+      setError("Debes seleccionar el modelo Prophet primero");
+      return;
+    }
+
     const validHorizons = selectedHorizons as ProphetHorizon[];
 
     setLoading(true);
@@ -146,24 +183,15 @@ const PredictionsReal = () => {
     }
   };
 
-  // ===== Toggle de horizonte =====
-  const toggleHorizon = (horizon: number) => {
-    setSelectedHorizons(prev => 
-      prev.includes(horizon)
-        ? prev.filter(h => h !== horizon)
-        : [...prev, horizon].sort((a, b) => a - b)
-    );
-  };
-
   // ===== Utilidades =====
   const selectedStationData = allowedStations.find(s => s.id === selectedStation);
 
-  const horizonOptions: { value: number; label: string; description: string; prophefOnly?: boolean }[] = [
+  const horizonOptions: { value: number; label: string; description: string; prophetOnly?: boolean }[] = [
     { value: 1, label: "1 hora", description: "Predicción inmediata" },
     { value: 3, label: "3 horas", description: "Corto plazo" },
     { value: 6, label: "6 horas", description: "Mediano plazo" },
     { value: 12, label: "12 horas", description: "Largo plazo" },
-    { value: 24, label: "24 horas", description: "Día completo", prophefOnly: true }
+    { value: 24, label: "24 horas", description: "Día completo", prophetOnly: true }
   ];
 
   return (
@@ -260,52 +288,105 @@ const PredictionsReal = () => {
                 )}
               </div>
 
+              {/* Selector de modelo */}
+              <div className="mb-6">
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Seleccionar Modelo
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => {
+                      setSelectedModel("xgboost");
+                      setSelectedHorizons(prev => prev.filter(h => h <= 12));
+                    }}
+                    className={`px-4 py-3 rounded-lg font-medium transition-all border-2 ${
+                      selectedModel === "xgboost"
+                        ? "bg-blue-600 text-white border-blue-600 shadow-md"
+                        : "bg-white text-gray-600 border-gray-200 hover:border-blue-300"
+                    }`}
+                  >
+                    <div className="text-sm font-bold">XGBoost</div>
+                    <div className={`text-xs ${selectedModel === "xgboost" ? "text-blue-100" : "text-gray-500"}`}>
+                      Hasta 12h
+                    </div>
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setSelectedModel("prophet");
+                      setSelectedHorizons([24]);
+                    }}
+                    className={`px-4 py-3 rounded-lg font-medium transition-all border-2 ${
+                      selectedModel === "prophet"
+                        ? "bg-purple-600 text-white border-purple-600 shadow-md"
+                        : "bg-white text-gray-600 border-gray-200 hover:border-purple-300"
+                    }`}
+                  >
+                    <div className="text-sm font-bold">Prophet</div>
+                    <div className={`text-xs ${selectedModel === "prophet" ? "text-purple-100" : "text-gray-500"}`}>
+                      Solo 24h
+                    </div>
+                  </button>
+                </div>
+              </div>
+
               {/* Selector de horizontes */}
               <div className="mb-6">
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
                   Horizontes de Predicción
                 </label>
                 <div className="space-y-2">
-                  {horizonOptions.map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => toggleHorizon(option.value)}
-                      className={`w-full px-4 py-3 rounded-lg font-medium transition-all border-2 ${
-                        selectedHorizons.includes(option.value)
-                          ? "bg-blue-600 text-white border-blue-600 shadow-md"
-                          : "bg-white text-gray-600 border-gray-200 hover:border-blue-300"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
-                            selectedHorizons.includes(option.value)
-                              ? "bg-white border-white"
-                              : "border-gray-400"
-                          }`}>
-                            {selectedHorizons.includes(option.value) && (
-                              <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                              </svg>
+                  {horizonOptions.map((option) => {
+                    const disabled = isHorizonDisabled(option.value);
+                    
+                    return (
+                      <button
+                        key={option.value}
+                        onClick={() => toggleHorizon(option.value)}
+                        disabled={disabled}
+                        className={`w-full px-4 py-3 rounded-lg font-medium transition-all border-2 ${
+                          selectedHorizons.includes(option.value)
+                            ? "bg-blue-600 text-white border-blue-600 shadow-md"
+                            : disabled
+                            ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-50"
+                            : "bg-white text-gray-600 border-gray-200 hover:border-blue-300"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                              selectedHorizons.includes(option.value)
+                                ? "bg-white border-white"
+                                : disabled
+                                ? "border-gray-300"
+                                : "border-gray-400"
+                            }`}>
+                              {selectedHorizons.includes(option.value) && (
+                                <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </div>
+                            <span className="font-bold">{option.label}</span>
+                            {option.prophetOnly && (
+                              <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded">
+                                Prophet
+                              </span>
                             )}
                           </div>
-                          <span className="font-bold">{option.label}</span>
-                          {option.prophefOnly && (
-                            <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded">
-                              Prophet
-                            </span>
-                          )}
+                          <span className={`text-xs ${
+                            selectedHorizons.includes(option.value)
+                              ? "text-blue-100"
+                              : disabled
+                              ? "text-gray-400"
+                              : "text-gray-500"
+                          }`}>
+                            {option.description}
+                          </span>
                         </div>
-                        <span className={`text-xs ${
-                          selectedHorizons.includes(option.value)
-                            ? "text-blue-100"
-                            : "text-gray-500"
-                        }`}>
-                          {option.description}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -313,7 +394,7 @@ const PredictionsReal = () => {
               <div className="space-y-3">
                 <button
                   onClick={handlePredictXGBoost}
-                  disabled={loading || !selectedStation || selectedHorizons.length === 0}
+                  disabled={loading || !selectedStation || selectedHorizons.length === 0 || selectedModel !== "xgboost"}
                   className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   {loading && activeModel === "xgboost" ? (
@@ -333,7 +414,7 @@ const PredictionsReal = () => {
 
                 <button
                   onClick={handlePredictProphet}
-                  disabled={loading || !selectedStation || selectedHorizons.length === 0}
+                  disabled={loading || !selectedStation || selectedHorizons.length === 0 || selectedModel !== "prophet"}
                   className="w-full py-4 px-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   {loading && activeModel === "prophet" ? (
@@ -354,15 +435,15 @@ const PredictionsReal = () => {
 
               {/* Información del modelo */}
               <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="text-xs font-semibold text-gray-600 mb-2">ℹ️ Modelos disponibles</div>
+                <div className="text-xs font-semibold text-gray-600 mb-2">Modelos disponibles</div>
                 <div className="space-y-2 text-xs text-gray-600">
                   <div className="flex items-center gap-2 p-2 bg-blue-50 rounded">
                     <span className="font-semibold text-blue-700">XGBoost:</span>
-                    <span>Hasta 12h • 17 features</span>
+                    <span>Hasta 12h - 17 features</span>
                   </div>
                   <div className="flex items-center gap-2 p-2 bg-purple-50 rounded">
                     <span className="font-semibold text-purple-700">Prophet:</span>
-                    <span>Hasta 24h • IC 95%</span>
+                    <span>Hasta 24h - IC 95%</span>
                   </div>
                 </div>
               </div>
@@ -445,7 +526,8 @@ const PredictionsReal = () => {
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         {xgboostPrediction.predictions.map((pred, index) => {
-                          const date = new Date(pred.timestamp);
+                          const date = new Date(pred.timestamp)
+
                           const quality = getAirQualityStatus(pred.predicted_pm25);
                           
                           return (
@@ -475,7 +557,7 @@ const PredictionsReal = () => {
                               <td className="px-6 py-4">
                                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-${quality.color}-100 text-${quality.color}-700`}>
                                   {quality.status}
-                                </span>
+                                </span  >
                               </td>
                             </tr>
                           );
@@ -499,9 +581,9 @@ const PredictionsReal = () => {
                   </h2>
                   <div className="grid grid-cols-4 gap-4">
                     <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                        <div className="text-xs font-medium text-purple-700 mb-1">Ciudad</div>
-                        <div className="text-sm font-bold text-purple-900">Bogotá</div>
-                        <div className="text-xs text-purple-600 mt-1">Promedio 10 estaciones</div>
+                      <div className="text-xs font-medium text-purple-700 mb-1">Ciudad</div>
+                      <div className="text-sm font-bold text-purple-900">Bogotá</div>
+                      <div className="text-xs text-purple-600 mt-1">Promedio 10 estaciones</div>
                     </div>
                     <div className="p-4 bg-pink-50 rounded-lg border border-pink-200">
                       <div className="text-xs font-medium text-pink-700 mb-1">Modelo</div>
@@ -521,7 +603,7 @@ const PredictionsReal = () => {
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
                   <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
                     <h2 className="text-lg font-semibold text-gray-800">
-                      Resultados con Intervalos de Confianza (95%)
+                      Resultados por Horizonte
                     </h2>
                   </div>
                   
@@ -531,104 +613,56 @@ const PredictionsReal = () => {
                         <tr>
                           <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Horizonte</th>
                           <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Predicción</th>
-                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Intervalo 95%</th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Intervalo de Confianza (95%)</th>
                           <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Fecha</th>
                           <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Estado</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         {Object.entries(prophetPrediction.predictions).map(([horizon, pred]) => {
-                          
-                          if (!pred || typeof pred.predicted_pm25 !== "number") return null;
 
                           const date = new Date(pred.prediction_timestamp);
                           const quality = getAirQualityStatus(pred.predicted_pm25);
                           const uncertaintyPct = getUncertaintyPercentage(pred);
                           const horizonNum = parseInt(horizon);
-
-                          // Forzar clases seguras de Tailwind
-                          const colorMap: Record<string, string> = {
-                            green: "bg-green-100 text-green-700",
-                            yellow: "bg-yellow-100 text-yellow-700",
-                            orange: "bg-orange-100 text-orange-700",
-                            red: "bg-red-100 text-red-700",
-                            purple: "bg-purple-100 text-purple-700",
-                            gray: "bg-gray-100 text-gray-700",
-                          };
-
-                          const qualityClass = colorMap[quality.color] || colorMap.gray;
-
-                          return (
+                          
+                          return  (
                             <tr key={horizon} className="hover:bg-gray-50 transition-colors">
-                              {/* Horizonte */}
                               <td className="px-6 py-4">
                                 <div className="flex items-center gap-2">
                                   <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                                     <span className="text-lg font-bold text-purple-700">
                                       +{isNaN(horizonNum) ? "?" : horizonNum}
                                     </span>
-                                  </div>
+                                  </div >
                                   <span className="text-sm text-gray-600">h</span>
                                 </div>
                               </td>
-
-                              {/* Predicción principal */}
                               <td className="px-6 py-4">
                                 <div className="text-2xl font-bold text-gray-900">
                                   {pred.predicted_pm25.toFixed(2)}
                                   <span className="text-sm text-gray-600 ml-1">μg/m³</span>
                                 </div>
-                                <div className="text-xs text-gray-500 mt-1">
-                                  Incertidumbre: {isNaN(uncertaintyPct) ? "—" : `${uncertaintyPct.toFixed(1)}%`}
-                                </div>
                               </td>
-
-                              {/* Intervalos de confianza */}
                               <td className="px-6 py-4">
-                                <div className="space-y-1">
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {formatConfidenceInterval(pred)}
-                                  </div>
-                                  <div className="flex items-center gap-2 text-xs text-gray-600">
-                                    <div className="flex items-center gap-1">
-                                      <span className="text-gray-400">Min:</span>
-                                      <span className="font-semibold">
-                                        {pred.lower_bound?.toFixed(1) ?? "—"}
-                                      </span>
-                                    </div>
-                                    <span className="text-gray-300">|</span>
-                                    <div className="flex items-center gap-1">
-                                      <span className="text-gray-400">Max:</span>
-                                      <span className="font-semibold">
-                                        {pred.upper_bound?.toFixed(1) ?? "—"}
-                                      </span>
-                                    </div>
+                                <div className="text-sm text-gray-700">
+                                  {formatConfidenceInterval(pred)}
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    Incertidumbre: {isNaN(uncertaintyPct) ? "—" : `${uncertaintyPct.toFixed(1)}%`}
                                   </div>
                                 </div>
+                                
                               </td>
-
-                              {/* Fecha */}
                               <td className="px-6 py-4">
                                 <div className="text-sm font-medium text-gray-900">
-                                  {date.toLocaleDateString("es-ES", {
-                                    day: "2-digit",
-                                    month: "short",
-                                    year: "2-digit",
-                                  })}
+                                  {date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
                                 </div>
                                 <div className="text-xs text-gray-500">
-                                  {date.toLocaleTimeString("es-ES", {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}
+                                  {date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
                                 </div>
                               </td>
-
-                              {/* Estado */}
                               <td className="px-6 py-4">
-                                <span
-                                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${qualityClass}`}
-                                >
+                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-${quality.color}-100 text-${quality.color}-700`}>
                                   {quality.status}
                                 </span>
                               </td>
@@ -636,28 +670,7 @@ const PredictionsReal = () => {
                           );
                         })}
                       </tbody>
-
                     </table>
-                  </div>
-                </div>
-
-                {/* Información adicional Prophet */}
-                <div className="bg-purple-50 rounded-xl p-4 border border-purple-200">
-                  <div className="flex items-start gap-3">
-                    <svg className="w-5 h-5 text-purple-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div className="flex-1">
-                      <h3 className="text-sm font-semibold text-purple-900 mb-2">
-                        Sobre las predicciones Prophet
-                      </h3>
-                      <div className="space-y-1 text-xs text-purple-700">
-                        <p>• Los intervalos de confianza del 95% indican el rango donde se espera que esté el valor real</p>
-                        <p>• Mayor incertidumbre (%) significa mayor variabilidad en la predicción</p>
-                        <p>• Prophet es especialmente efectivo para capturar patrones temporales y tendencias</p>
-                        <p>• Última medición: {new Date(prophetPrediction.last_known_timestamp).toLocaleString('es-ES')}</p>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -668,5 +681,6 @@ const PredictionsReal = () => {
     </div>
   );
 };
+
 
 export default PredictionsReal;

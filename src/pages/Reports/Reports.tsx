@@ -17,6 +17,7 @@ interface MonitorReport {
   monitor_type: string;
   value: number;
   status: string;
+  unit: string;
   timestamp: string;
   date: string;
 }
@@ -292,7 +293,7 @@ const Reports = () => {
           setSummary(summaryData.data);
         } else {
           const data = await getReportsByMonitor(selectedMonitor);
-          setMonitorReports(data.reports);
+          setMonitorReports(data.reports as MonitorReport[]);
           setMonitorStats(data.statistics);
         }
       } catch (err) {
@@ -559,9 +560,11 @@ const Reports = () => {
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         {viewMode === "pm25" ? "Concentración PM2.5" : `Promedio ${selectedMonitor}`}
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Estado
-                      </th>
+                      {viewMode === "pm25" && (
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                          Estado
+                        </th>
+                      )}                 
                       <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Acción
                       </th>
@@ -617,26 +620,23 @@ const Reports = () => {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">
-                                {new Date().toISOString().slice(0, 19).replace('T', ' ')}-05
-                              </div>
-                            </td>
+                            <div className="text-sm text-gray-900">
+                              {new Date(report.timestamp).toLocaleString('es-ES', {
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              }).replace(/(\d+)\/(\d+)\/(\d+),?\s*(.+)/, '$3-$2-$1 $4')}
+                            </div>
+                          </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm font-bold text-gray-900">
-                                {typeof report.value === 'number' ? report.value.toFixed(1) : 'N/A'} {report.monitor_type === 'CO' ? 'mg/m³' : 'µg/m³'}
+                                {typeof report.value === 'number' ? report.value.toFixed(1) : 'N/A'} {report.unit}
                               </div>
                               <div className="text-xs text-gray-500">
                                 {report.monitor_type}
                               </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span
-                                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(
-                                  report.status
-                                )}`}
-                              >
-                                {report.status}
-                              </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-center">
                               <button
