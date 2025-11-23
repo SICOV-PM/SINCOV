@@ -85,7 +85,7 @@ export interface MonitorReport {
   
 }
 
-// Endpoints existentes
+
 export async function getReports(): Promise<{ success: boolean; total: number; reports: Report[] }> {
   return apiFetch("/reports/");
 }

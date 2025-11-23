@@ -50,7 +50,7 @@ const PredictionsReal = () => {
   const [activeModel, setActiveModel] = useState<ModelType | null>(null);
   const [selectedModel, setSelectedModel] = useState<ModelType | null>(null);
 
-  // ===== Carga inicial =====
+ 
   useEffect(() => {
     Promise.all([
       getAllowedStations(),
@@ -71,7 +71,7 @@ const PredictionsReal = () => {
       .finally(() => setLoadingStations(false));
   }, []);
 
-  // ===== Función para determinar si un horizonte está deshabilitado =====
+ 
   const isHorizonDisabled = (horizon: number): boolean => {
     if (!selectedModel) return false;
     
