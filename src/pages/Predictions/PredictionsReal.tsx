@@ -255,61 +255,39 @@ const PredictionsReal = () => {
                 Configuración
               </h2>
 
-            {/* Selector de estación - Solo mostrar para XGBoost */}
-              {selectedModel === "xgboost" ? (
-                <div className="mb-6">
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">
-                    Estación de Monitoreo
-                  </label>
-                  {loadingStations ? (
-                    <div className="flex items-center justify-center py-4">
-                      <div className="w-6 h-6 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-                    </div>
-                  ) : (
-                    <select
-                      value={selectedStation || ""}
-                      onChange={(e) => setSelectedStation(Number(e.target.value))}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 font-medium"
-                    >
-                      {allowedStations.map((station) => (
-                        <option key={station.id} value={station.id}>
-                          {station.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                  
-                  {selectedStationData && (
-                    <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <div className="text-xs text-blue-700 font-medium mb-1">Estación:</div>
-                      <div className="text-lg font-bold text-blue-900">
-                        {selectedStationData.name}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : selectedModel === "prophet" ? (
-                <div className="mb-6">
-                  <div className="p-4 bg-purple-50 rounded-lg border-2 border-purple-200">
-                    <div className="flex items-center gap-3">
-                      <svg className="w-10 h-10 text-purple-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      <div>
-                        <div className="text-xs text-purple-700 font-medium mb-1">Alcance de predicción:</div>
-                        <div className="text-lg font-bold text-purple-900">
-                          Toda Bogotá
-                        </div>
-                        <div className="text-xs text-purple-600 mt-1">
-                          Promedio de todas las estaciones
-                        </div>
-                      </div>
+              {/* Selector de estación */}
+              <div className="mb-6">
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Estación de Monitoreo
+                </label>
+                {loadingStations ? (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="w-6 h-6 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                  </div>
+                ) : (
+                  <select
+                    value={selectedStation || ""}
+                    onChange={(e) => setSelectedStation(Number(e.target.value))}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 font-medium"
+                  >
+                    {allowedStations.map((station) => (
+                      <option key={station.id} value={station.id}>
+                        {station.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                
+                {selectedStationData && (
+                  <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="text-xs text-blue-700 font-medium mb-1">Estación:</div>
+                    <div className="text-lg font-bold text-blue-900">
+                      {selectedStationData.name}
                     </div>
                   </div>
-                </div>
-              ) : null}
-
+                )}
+              </div>
+              
               {/* Selector de modelo */}
               <div className="mb-6">
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
