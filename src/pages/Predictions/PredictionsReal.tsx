@@ -255,38 +255,60 @@ const PredictionsReal = () => {
                 Configuración
               </h2>
 
-              {/* Selector de estación */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Estación de Monitoreo
-                </label>
-                {loadingStations ? (
-                  <div className="flex items-center justify-center py-4">
-                    <div className="w-6 h-6 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-                  </div>
-                ) : (
-                  <select
-                    value={selectedStation || ""}
-                    onChange={(e) => setSelectedStation(Number(e.target.value))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 font-medium"
-                  >
-                    {allowedStations.map((station) => (
-                      <option key={station.id} value={station.id}>
-                        {station.name}
-                      </option>
-                    ))}
-                  </select>
-                )}
-                
-                {selectedStationData && (
-                  <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="text-xs text-blue-700 font-medium mb-1">Estación:</div>
-                    <div className="text-lg font-bold text-blue-900">
-                      {selectedStationData.name}
+            {/* Selector de estación - Solo mostrar para XGBoost */}
+              {selectedModel === "xgboost" ? (
+                <div className="mb-6">
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                    Estación de Monitoreo
+                  </label>
+                  {loadingStations ? (
+                    <div className="flex items-center justify-center py-4">
+                      <div className="w-6 h-6 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                    </div>
+                  ) : (
+                    <select
+                      value={selectedStation || ""}
+                      onChange={(e) => setSelectedStation(Number(e.target.value))}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 font-medium"
+                    >
+                      {allowedStations.map((station) => (
+                        <option key={station.id} value={station.id}>
+                          {station.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  
+                  {selectedStationData && (
+                    <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="text-xs text-blue-700 font-medium mb-1">Estación:</div>
+                      <div className="text-lg font-bold text-blue-900">
+                        {selectedStationData.name}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : selectedModel === "prophet" ? (
+                <div className="mb-6">
+                  <div className="p-4 bg-purple-50 rounded-lg border-2 border-purple-200">
+                    <div className="flex items-center gap-3">
+                      <svg className="w-10 h-10 text-purple-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <div>
+                        <div className="text-xs text-purple-700 font-medium mb-1">Alcance de predicción:</div>
+                        <div className="text-lg font-bold text-purple-900">
+                          Toda Bogotá
+                        </div>
+                        <div className="text-xs text-purple-600 mt-1">
+                          Promedio de todas las estaciones
+                        </div>
+                      </div>
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              ) : null}
 
               {/* Selector de modelo */}
               <div className="mb-6">
@@ -330,108 +352,130 @@ const PredictionsReal = () => {
                 </div>
               </div>
 
-              {/* Selector de horizontes */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Horizontes de Predicción
-                </label>
-                <div className="space-y-2">
-                  {horizonOptions.map((option) => {
-                    const disabled = isHorizonDisabled(option.value);
-                    
-                    return (
-                      <button
-                        key={option.value}
-                        onClick={() => toggleHorizon(option.value)}
-                        disabled={disabled}
-                        className={`w-full px-4 py-3 rounded-lg font-medium transition-all border-2 ${
-                          selectedHorizons.includes(option.value)
-                            ? "bg-blue-600 text-white border-blue-600 shadow-md"
-                            : disabled
-                            ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-50"
-                            : "bg-white text-gray-600 border-gray-200 hover:border-blue-300"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+
+            {/* Selector de horizontes - Solo mostrar si hay un modelo seleccionado */}
+              {selectedModel && (
+                <div className="mb-6">
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                    Horizontes de Predicción
+                  </label>
+                  <div className="space-y-2">
+                    {horizonOptions
+                      .filter((option) => {
+                        
+                        if (selectedModel === "xgboost") {
+                          return option.value <= 12; // XGBoost: 1h, 3h, 6h, 12h
+                        } else if (selectedModel === "prophet") {
+                          return option.prophetOnly; // Prophet: solo 24h
+                        }
+                        return false;
+                      })
+                      .map((option) => {
+                        return (
+                          <button
+                            key={option.value}
+                            onClick={() => toggleHorizon(option.value)}
+                            className={`w-full px-4 py-3 rounded-lg font-medium transition-all border-2 ${
                               selectedHorizons.includes(option.value)
-                                ? "bg-white border-white"
-                                : disabled
-                                ? "border-gray-300"
-                                : "border-gray-400"
-                            }`}>
-                              {selectedHorizons.includes(option.value) && (
-                                <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                </svg>
-                              )}
-                            </div>
-                            <span className="font-bold">{option.label}</span>
-                            {option.prophetOnly && (
-                              <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded">
-                                Prophet
+                                ? "bg-blue-600 text-white border-blue-600 shadow-md"
+                                : "bg-white text-gray-600 border-gray-200 hover:border-blue-300"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                                  selectedHorizons.includes(option.value)
+                                    ? "bg-white border-white"
+                                    : "border-gray-400"
+                                }`}>
+                                  {selectedHorizons.includes(option.value) && (
+                                    <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  )}
+                                </div>
+                                <span className="font-bold">{option.label}</span>
+                                {option.prophetOnly && (
+                                  <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded">
+                                    Prophet
+                                  </span>
+                                )}
+                              </div>
+                              <span className={`text-xs ${
+                                selectedHorizons.includes(option.value)
+                                  ? "text-blue-100"
+                                  : "text-gray-500"
+                              }`}>
+                                {option.description}
                               </span>
-                            )}
-                          </div>
-                          <span className={`text-xs ${
-                            selectedHorizons.includes(option.value)
-                              ? "text-blue-100"
-                              : disabled
-                              ? "text-gray-400"
-                              : "text-gray-500"
-                          }`}>
-                            {option.description}
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
+                            </div>
+                          </button>
+                        );
+                      })}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Botones de predicción */}
-              <div className="space-y-3">
-                <button
-                  onClick={handlePredictXGBoost}
-                  disabled={loading || !selectedStation || selectedHorizons.length === 0 || selectedModel !== "xgboost"}
-                  className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  {loading && activeModel === "xgboost" ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Generando XGBoost...
-                    </span>
-                  ) : (
-                    <span className="flex items-center justify-center gap-2">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                      Predecir con XGBoost
-                    </span>
+              {selectedModel && (
+                <div className="space-y-3">
+                  {selectedModel === "xgboost" && (
+                    <button
+                      onClick={handlePredictXGBoost}
+                      disabled={loading || !selectedStation || selectedHorizons.length === 0}
+                      className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                      {loading && activeModel === "xgboost" ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          Generando XGBoost...
+                        </span>
+                      ) : (
+                        <span className="flex items-center justify-center gap-2">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                          Predecir con XGBoost
+                        </span>
+                      )}
+                    </button>
                   )}
-                </button>
 
-                <button
-                  onClick={handlePredictProphet}
-                  disabled={loading || !selectedStation || selectedHorizons.length === 0 || selectedModel !== "prophet"}
-                  className="w-full py-4 px-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  {loading && activeModel === "prophet" ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Generando Prophet...
-                    </span>
-                  ) : (
-                    <span className="flex items-center justify-center gap-2">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                      </svg>
-                      Predecir con Prophet
-                    </span>
+                  {selectedModel === "prophet" && (
+                    <button
+                      onClick={handlePredictProphet}
+                      disabled={loading || !selectedStation || selectedHorizons.length === 0}
+                      className="w-full py-4 px-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                      {loading && activeModel === "prophet" ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          Generando Prophet...
+                        </span>
+                      ) : (
+                        <span className="flex items-center justify-center gap-2">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                          </svg>
+                          Predecir con Prophet
+                        </span>
+                      )}
+                    </button>
                   )}
-                </button>
-              </div>
+                </div>
+              )}
+
+              {/* Mensaje cuando no hay modelo seleccionado */}
+              {!selectedModel && (
+                <div className="p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 text-center">
+                  <svg className="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  <p className="text-sm text-gray-600 font-medium">
+                    Selecciona un modelo para continuar
+                  </p>
+                </div>
+              )}
 
               {/* Información del modelo */}
               <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
@@ -443,7 +487,7 @@ const PredictionsReal = () => {
                   </div>
                   <div className="flex items-center gap-2 p-2 bg-purple-50 rounded">
                     <span className="font-semibold text-purple-700">Prophet:</span>
-                    <span>Hasta 24h - IC 95%</span>
+                    <span>Hasta 24h </span>
                   </div>
                 </div>
               </div>
@@ -480,6 +524,8 @@ const PredictionsReal = () => {
                 </p>
               </div>
             )}
+
+            
 
             {/* Resultados XGBoost */}
             {xgboostPrediction && (
@@ -613,7 +659,6 @@ const PredictionsReal = () => {
                         <tr>
                           <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Horizonte</th>
                           <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Predicción</th>
-                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Intervalo de Confianza (95%)</th>
                           <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Fecha</th>
                           <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Estado</th>
                         </tr>
@@ -623,7 +668,6 @@ const PredictionsReal = () => {
 
                           const date = new Date(pred.prediction_timestamp);
                           const quality = getAirQualityStatus(pred.predicted_pm25);
-                          const uncertaintyPct = getUncertaintyPercentage(pred);
                           const horizonNum = parseInt(horizon);
                           
                           return  (
@@ -643,15 +687,6 @@ const PredictionsReal = () => {
                                   {pred.predicted_pm25.toFixed(2)}
                                   <span className="text-sm text-gray-600 ml-1">μg/m³</span>
                                 </div>
-                              </td>
-                              <td className="px-6 py-4">
-                                <div className="text-sm text-gray-700">
-                                  {formatConfidenceInterval(pred)}
-                                  <div className="text-xs text-gray-500 mt-1">
-                                    Incertidumbre: {isNaN(uncertaintyPct) ? "—" : `${uncertaintyPct.toFixed(1)}%`}
-                                  </div>
-                                </div>
-                                
                               </td>
                               <td className="px-6 py-4">
                                 <div className="text-sm font-medium text-gray-900">
