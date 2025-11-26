@@ -73,11 +73,11 @@ const About = () => {
             </div>
             <div className="glass-panel p-6 rounded-2xl shadow-lg">
               <h4 className="text-lg font-semibold text-blue-600 mb-2">
-                Predicciones y alertas
+                Predicciones
               </h4>
               <p className="text-sm text-gray-600">
-                Análisis predictivo basado en datos históricos para anticipar 
-                episodios de alta contaminación y emitir alertas tempranas.
+                Análisis predictivo basado en datos históricos para anticipar
+                episodios de alta contaminación y tomar medidas preventivas
               </p>
             </div>
           </div>
