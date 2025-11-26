@@ -364,12 +364,11 @@ const Monitoring = () => {
                 </div>
                 <div className="space-y-2">
                   {[
-                    { level: "Favorable", color: "#3b82f6", bgColor: "bg-blue-50", textColor: "text-blue-700", range: "0 - 12.0" },
-                    { level: "Moderada", color: "#22c55e", bgColor: "bg-green-50", textColor: "text-green-700", range: "12.1 - 35.4" },
-                    { level: "Regular", color: "#eab308", bgColor: "bg-yellow-50", textColor: "text-yellow-700", range: "35.5 - 55.4" },
-                    { level: "Mala", color: "#f97316", bgColor: "bg-orange-50", textColor: "text-orange-700", range: "55.5 - 150.4" },
-                    { level: "Muy Mala", color: "#dc2626", bgColor: "bg-red-50", textColor: "text-red-700", range: "150.5 - 250.4" },
-                    { level: "Peligrosa", color: "#9333ea", bgColor: "bg-purple-50", textColor: "text-purple-700", range: "≥ 250.5" }
+                    { level: "Bajo", color: "#16a34a", bgColor: "bg-green-100", textColor: "text-green-600", range: "0 - 12.0" },
+                    { level: "Moderado", color: "#e5fb1cff", bgColor: "bg-yellow-50", textColor: "text-yellow-400", range: "12.1 - 35.4" },
+                    { level: "Regular", color: "#f9883cff", bgColor: "bg-orange-100", textColor: "text-orange-600", range: "35.5 - 55.4" },
+                    { level: "Alto", color: "#dc2626", bgColor: "bg-red-100", textColor: "text-red-600", range: "55.5 - 150.4" },
+                    { level: "Peligroso", color: "#5126dcff", bgColor: "bg-purple-100", textColor: "text-purple-600", range: "151.4+" },
                   ].map(({ level, color, bgColor, textColor, range }) => (
                     <div key={level} className={`flex items-center justify-between p-3 ${bgColor} rounded-lg border border-gray-200 hover:shadow-sm transition-shadow`}>
                       <div className="flex items-center gap-3">

@@ -17,6 +17,7 @@ interface MonitorReport {
   monitor_type: string;
   value: number;
   status: string;
+  unit: string;
   timestamp: string;
   date: string;
 }
@@ -292,7 +293,7 @@ const Reports = () => {
           setSummary(summaryData.data);
         } else {
           const data = await getReportsByMonitor(selectedMonitor);
-          setMonitorReports(data.reports);
+          setMonitorReports(data.reports as MonitorReport[]);
           setMonitorStats(data.statistics);
         }
       } catch (err) {
@@ -414,7 +415,7 @@ const Reports = () => {
           <>
             {/* Statistics Summary */}
             {viewMode === "pm25" && summary && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -459,20 +460,6 @@ const Reports = () => {
                       <p className="text-2xl font-bold text-green-600">
                         {typeof summary.min_pm25 === 'number' ? summary.min_pm25.toFixed(1) : 'N/A'} µg/m³
                       </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Total Estaciones</p>
-                      <p className="text-2xl font-bold text-purple-600">{summary.total_stations || 0}</p>
                     </div>
                   </div>
                 </div>
@@ -559,9 +546,11 @@ const Reports = () => {
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         {viewMode === "pm25" ? "Concentración PM2.5" : `Promedio ${selectedMonitor}`}
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Estado
-                      </th>
+                      {viewMode === "pm25" && (
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                          Estado
+                        </th>
+                      )}                 
                       <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Acción
                       </th>
@@ -618,12 +607,12 @@ const Reports = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm text-gray-900">
-                                {new Date().toISOString().slice(0, 19).replace('T', ' ')}-05
+                                {new Date(report.timestamp).toISOString().slice(0, 10)}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm font-bold text-gray-900">
-                                {typeof report.value === 'number' ? report.value.toFixed(1) : 'N/A'} {report.monitor_type === 'CO' ? 'mg/m³' : 'µg/m³'}
+                                {typeof report.value === 'number' ? report.value.toFixed(1) : 'N/A'} {report.unit}
                               </div>
                               <div className="text-xs text-gray-500">
                                 {report.monitor_type}
